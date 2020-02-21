@@ -20,11 +20,15 @@ var quizController = (function() {
 
 	return {
 		addQuestionOnLocalStorage: function(newQuestText, opts) {
-			var optionsArr, corrAns, questionId, newQuestion;
+			var optionsArr, corrAns, questionId, newQuestion, getStoredQuests, isChecked;
+
+			if (questionLocalStorage.getQuestionCollection() === null) {
+				questionLocalStorage.setQuestionCollection([]);
+			}
 
 			optionsArr = [];
 
-			questionId = 0;
+			isChecked = false;
 
 			for (var i = 0; i < opts.length; i++) {
 				if (opts[i].value !== '') {
@@ -32,6 +36,7 @@ var quizController = (function() {
 				}
 				if (opts[i].previousElementSibling.checked && opts[i].value !== '') {
 					corrAns = opts[i].value;
+					isChecked = true;
 				}
 			}
 
@@ -44,9 +49,34 @@ var quizController = (function() {
 				questionId = 0;
 			}
 
-			newQuestion = new Question(questionId, newQuestText.value, optionsArr, correctAnswer);
+			if (newQuestText.value !== '') {
+				if (optionsArr.length > 1) {
+					if (isChecked) {
+						newQuestion = new Question(questionId, newQuestText.value, optionsArr, correctAnswer);
 
-			console.log(newQuestion);
+						getStoredQuests = questionLocalStorage.getQuestionCollection();
+
+						getStoredQuests.push(newQuestion);
+
+						questionLocalStorage.setQuestionCollection(getStoredQuests);
+
+						newQuestText.value = '';
+
+						for (var x = 0; x < opts.length; x++) {
+							opts[x].value = '';
+							opts[x].previousElementSibling.checked = false;
+						}
+
+						console.log(questionLocalStorage.getQuestionCollection());
+					} else {
+						alert("You didn't check the correct answer, or you checked an answer without value");
+					}
+				} else {
+					alert('You must insert at least two options');
+				}
+			} else {
+				alert('Please, Insert Question');
+			}
 		}
 	};
 })();
