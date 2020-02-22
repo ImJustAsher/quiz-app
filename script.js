@@ -90,11 +90,28 @@ var UIController = (function() {
 		// ****** Admin Panel Elements******
 		questInsertBtn: document.getElementById('question-insert-btn'),
 		newQuestionText: document.getElementById('new-question-text'),
-		adminOptions: document.querySelectorAll('.admin-option')
+		adminOptions: document.querySelectorAll('.admin-option'),
+		adminOptionsContainer: document.querySelector('.admin-options-container')
 	};
 
 	return {
-		getDomItems: domItems
+		getDomItems: domItems,
+
+		addInputsDynamically: function() {
+			var addInput = function() {
+				
+				var inputHTML, z;
+
+				z = document.querySelectorAll('.admin-option').length;
+
+				inputHTML = '<div class="admin-option-wrapper"><input type="radio" class="admin-option-' + z '" name="answer" 
+				value="' + z '"><input type="text" class="admin-option admin-option-' + z + '" value=""></div>'
+			}
+
+			domItems.adminOptionsContainer.insertAdjacentHTML('beforeend', inputHTML);
+
+			domItems.adminOptionsContainer.lastElementChild.lastElementChild.addEventListener('focus', addInput);
+		}
 	};
 })();
 
@@ -106,7 +123,12 @@ var UIController = (function() {
 var controller = (function(quizCtrl, UICtrl) {
 	var selectedDomItems = UICtrl.getDomItems;
 
+	UICtrl.addInputsDynamically();
+
 	selectedDomItems.questInsertBtn.addEventListener('click', function() {
-		quizCtrl.addQuestionOnLocalStorage(selectedDomItems.newQuestionText, selectedDomItems.adminOptions);
+
+		var adminOptions = document.querySelectorAll('.admin-option');
+
+		quizCtrl.addQuestionOnLocalStorage(selectedDomItems.newQuestionText, adminOptions);
 	});
 })(quizController, UIController);
