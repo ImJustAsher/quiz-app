@@ -193,17 +193,10 @@ var UIController = (function() {
 		createQuestionList: function(getQuestions) {
 			// 86          // 91
 			var questHTML, numberingArr;
-			// 92
 			numberingArr = [];
-			// 82
-			// console.log(getQuestions);
-			// 84
 			domItems.insertedQuestsWrapper.innerHTML = '';
-			// 85
 			for (var i = 0; i < getQuestions.getQuestionCollection().length; i++) {
-				// 93
 				numberingArr.push(i + 1);
-				// 87                     // 94                    // 88
 				questHTML =
 					'<p><span>' +
 					numberingArr[i] +
@@ -212,10 +205,13 @@ var UIController = (function() {
 					'</span><button id="question-' +
 					getQuestions.getQuestionCollection()[i].id +
 					'">Edit</button></p>';
-				// 95
-				console.log(getQuestions.getQuestionCollection()[i].id);
-				// 89
 				domItems.insertedQuestsWrapper.insertAdjacentHTML('afterbegin', questHTML);
+			}
+		},
+
+		editQuestList: function(event, storageQuestList) {
+			if ('question-'.indexOf(event.target.id)) {
+				console.log(event.target.id);
 			}
 		}
 	};
@@ -245,5 +241,9 @@ var controller = (function(quizCtrl, UICtrl) {
 			// 102
 			UICtrl.createQuestionList(quizCtrl.getQuestionLocalStorage);
 		}
+	});
+
+	selectedDomItems.insertedQuestsWrapper.addEventListener('click', function(e) {
+		UICtrl.editQuestList(e, quizCtrl.getQuestionLocalStorage);
 	});
 })(quizController, UIController);
