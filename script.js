@@ -117,7 +117,7 @@ var quizController = (function() {
 						// 61
 					} else {
 						// 62
-						alert('You missed to check correct answer, or you checked answer without value');
+						alert("You didn't a check correct answer, or you checked an answer without value");
 						//97
 						return false;
 					}
@@ -254,9 +254,44 @@ var UIController = (function() {
 				addInpsDynFn();
 
 				let updateQuestion = function() {
+					let newOptions, optionEls;
+
+					newOptions = [];
+
+					optionEls = document.querySelectorAll('.admin-option');
+
 					foundItem.questionText = document.newQuestText.value;
 
-					console.log('Works');
+					foundItem.correctAnswer = '';
+
+					foundItem.correctAnswer = '';
+
+					for (let i = 0; i < optionEls.length; i++) {
+						if (optionEls[i].value !== '') {
+							newOptions.push(optionEls[i].value);
+							if (optionEls[i].previousElementSibling.checked) {
+								foundItem.correctAnswer = optionEls[i].value;
+							}
+						}
+					}
+
+					foundItems.options = newOptions;
+
+					if (foundItem.questionText !== '') {
+						if (foundItem.options.length > 1) {
+							if (foundItem.correctAnswer !== '') {
+								getStorageQuestList.splice(placeInArr, 1, foundItem);
+
+								storageQuestList.setQuestionCollection(getStorageQuestList);
+							} else {
+								alert("You didn't check a correct answer, or you checked an answer without value");
+							}
+						} else {
+							alert('You must insert at least two options');
+						}
+					} else {
+						alert('Please Insert Question');
+					}
 				};
 
 				domItems.questUpdateBtn.onclick = updateQuestion;
