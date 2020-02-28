@@ -210,8 +210,20 @@ var UIController = (function() {
 		},
 
 		editQuestList: function(event, storageQuestList) {
+			let getId, getStorageQuestList, foundItem, placeInArr;
+
 			if ('question-'.indexOf(event.target.id)) {
-				console.log(event.target.id);
+				getId = parseInt(event.target.id.split('-')[1]);
+
+				getStorageQuestList = storageQuestList.getQuestionCollection();
+
+				for (let i = 0; i < getStorageQuestList.length; i++) {
+					if (getStorageQuestList[i].id === getId) {
+						foundItem = getStorageQuestList[i];
+
+						placeInArr = i;
+					}
+				}
 			}
 		}
 	};
