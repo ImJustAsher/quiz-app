@@ -212,7 +212,7 @@ var UIController = (function() {
 			}
 		},
 
-		editQuestList: function(event, storageQuestList, addInpsDynFn) {
+		editQuestList: function(event, storageQuestList, addInpsDynFn, updateQuestListFn) {
 			let getId, getStorageQuestList, foundItem, placeInArr, optionHTML;
 
 			if ('question-'.indexOf(event.target.id)) {
@@ -253,12 +253,28 @@ var UIController = (function() {
 
 				addInpsDynFn();
 
+				let backDefaultView = function() {
+					let updatedOptions;
+					domItems.newQuestionText.value = '';
+					updatedOptions = document.querySelectorAll('.admin-option');
+
+					for (let i = 0; i < updatedOptions.length; i++) {
+						updatedOptions[i].value = '';
+						updatedOptions[i].previousElementSibling.checked = false;
+					}
+
+					domItems.questUpdateBtn.style.visibility = 'visible';
+					domItems.questDeleteBtn.style.visibility = 'hidden';
+					domItems.questInsertBtn.style.visibility = 'visible';
+					domItems.questsClearBtn.style.pointerEvents = '';
+
+					updateQuestListFn(storageQuestList);
+				};
+
 				let updateQuestion = function() {
 					let newOptions, optionEls;
 
 					newOptions = [];
-
-					optionEls = document.querySelectorAll('.admin-option');
 
 					foundItem.questionText = document.newQuestText.value;
 
@@ -283,6 +299,8 @@ var UIController = (function() {
 								getStorageQuestList.splice(placeInArr, 1, foundItem);
 
 								storageQuestList.setQuestionCollection(getStorageQuestList);
+
+								backDefaultView();
 							} else {
 								alert("You didn't check a correct answer, or you checked an answer without value");
 							}
@@ -295,6 +313,14 @@ var UIController = (function() {
 				};
 
 				domItems.questUpdateBtn.onclick = updateQuestion;
+
+				let deleteQuestion = function() {
+					getStorageQuestList.splice(placeInArr, 1);
+
+					storageQuestList.setQuestionCollection(getStorageQuestList);
+				};
+
+				domItems.questDeleteBtn.onclick = deleteQuestion;
 			}
 		}
 	};
@@ -327,6 +353,11 @@ var controller = (function(quizCtrl, UICtrl) {
 	});
 
 	selectedDomItems.insertedQuestsWrapper.addEventListener('click', function(e) {
-		UICtrl.editQuestList(e, quizCtrl.getQuestionLocalStorage, UICtrl.addInputsDynamically);
+		UICtrl.editQuestList(
+			e,
+			quizCtrl.getQuestionLocalStorage,
+			UICtrl.addInputsDynamically,
+			UICtrl.createQuestionList
+		);
 	});
 })(quizController, UIController);
