@@ -3,9 +3,7 @@
 /*******************************
 *********QUIZ CONTROLLER********
 *******************************/
-// 1
 var quizController = (function() {
-	// 4
 	//*********Question Constructor*********/
 	function Question(id, questionText, options, correctAnswer) {
 		this.id = id;
@@ -14,17 +12,13 @@ var quizController = (function() {
 		this.correctAnswer = correctAnswer;
 	}
 
-	//34
 	var questionLocalStorage = {
-		// 35
 		setQuestionCollection: function(newCollection) {
 			localStorage.setItem('questionCollection', JSON.stringify(newCollection));
 		},
-		// 36
 		getQuestionCollection: function() {
 			return JSON.parse(localStorage.getItem('questionCollection'));
 		},
-		// 37
 		removeQuestionCollection: function() {
 			localStorage.removeItem('questionCollection');
 		}
@@ -32,7 +26,14 @@ var quizController = (function() {
 	if (questionLocalStorage.getQuestionCollection() === null) {
 		questionLocalStorage.setQuestionCollection([]);
 	}
+
+	let quizProgress = {
+		questionIndex: 0
+	};
+
 	return {
+		getQuizProgress: quizProgress,
+
 		getQuestionLocalStorage: questionLocalStorage,
 		addQuestionOnLocalStorage: function(newQuestText, opts) {
 			var optionsArr, corrAns, questionId, newQuestion, getStoredQuests, isChecked;
@@ -113,23 +114,21 @@ var UIController = (function() {
 		insertedQuestsWrapper: document.querySelector('.inserted-questions-wrapper'),
 		questUpdateBtn: document.getElementById('question-update-btn'),
 		questDeleteBtn: document.getElementById('question-delete-btn'),
-		questsClearBtn: document.getElementById('questions-clear-btn')
+		questsClearBtn: document.getElementById('questions-clear-btn'),
+		askedQuestText: document.getElementById('asked-question-text'),
+		quizOptionsWrapper: document.querySelector('.quiz-options-wrapper'),
+		progressBar: document.querySelector('progress'),
+		progressPar: document.getElementById('progress')
 	};
 
-	// 7
 	return {
 		getDomItems: domItems, // 8
-		// 63
 		addInputsDynamically: function() {
-			// 67
 			var addInput = function() {
-				// 68
-				// console.log('Works');
-				// 69         // 71
 				var inputHTML, z;
-				// 72
+
 				z = document.querySelectorAll('.admin-option').length;
-				// 70                                                                                 //73
+
 				inputHTML =
 					'<div class="admin-option-wrapper"><input type="radio" class="admin-option-' +
 					z +
@@ -138,20 +137,20 @@ var UIController = (function() {
 					'"><input type="text" class="admin-option admin-option-' +
 					z +
 					'" value=""></div>';
-				// 74
+
 				domItems.adminOptionsContainer.insertAdjacentHTML('beforeend', inputHTML);
-				// 75
+
 				domItems.adminOptionsContainer.lastElementChild.previousElementSibling.lastElementChild.removeEventListener(
 					'focus',
 					addInput
 				);
-				// 76
+
 				domItems.adminOptionsContainer.lastElementChild.lastElementChild.addEventListener('focus', addInput);
 			};
-			// 66
+
 			domItems.adminOptionsContainer.lastElementChild.lastElementChild.addEventListener('focus', addInput);
 		},
-		// 79
+
 		createQuestionList: function(getQuestions) {
 			// 86          // 91
 			var questHTML, numberingArr;
@@ -289,9 +288,55 @@ var UIController = (function() {
 					let conf = confirm('Warning! You will lose entire question list');
 					if (conf) {
 						storageQuestList.removeQuestionCollection();
+
+						domItems.insertedQuestsWrapper.innerHTML = '';
 					}
 				}
 			}
+		},
+
+		displayQuestion: function(storageQuestList, progress) {
+			let newOptionHTML, characterArr;
+
+			characterArr = [ 'A', 'B', 'C', 'D', 'E', 'F' ];
+
+			if (storageQuestList.getQuestionCollection().length > 0) {
+				domItems.askedQuestText.textContent = storageQuestList.getQuestionCollection()[
+					progress.questionIndex
+				].questionText;
+
+				domItems.quizOptionsWrapper.innerHTML = '';
+
+				for (
+					let i = 0;
+					i < storageQuestList.getQuestionCollection()[progress.questionIndex].options.length;
+					i++
+				) {
+					newOptionHTML =
+						'<div class="choice-' +
+						i +
+						'"><span class="choice-' +
+						i +
+						'">' +
+						characterArr[i] +
+						'</span><p  class="choice-' +
+						i +
+						'">' +
+						storageQuestList.getQuestionCollection()[progress.questionIndex].options[i] +
+						'</p></div>';
+
+					domItems.quizOptionsWrapper.insertAdjacentHTML('beforeend', newOptionHTML);
+				}
+			}
+		},
+
+		displayProgress: function(storageQuestList, progress) {
+			domItems.progressBar.max = storageQuestList.getQuestionCollection().length;
+
+			domItems.progressBar.value = progress.questionIndex + 1;
+
+			domItems.progressPar.textContent =
+				progress.questionIndex + 1 + '/' + storageQuestList.getQuestionCollection().length;
 		}
 	};
 })();
@@ -299,17 +344,16 @@ var UIController = (function() {
 /*******************************
 ***********CONTROLLER***********
 *******************************/
-// 3
-var controller = (function(quizCtrl, UICtrl) {
-	var selectedDomItems = UICtrl.getDomItems;
+let controller = (function(quizCtrl, UICtrl) {
+	let selectedDomItems = UICtrl.getDomItems;
 
 	UICtrl.addInputsDynamically();
 
 	UICtrl.createQuestionList(quizCtrl.getQuestionLocalStorage);
 
 	selectedDomItems.questInsertBtn.addEventListener('click', function() {
-		var adminOptions = document.querySelectorAll('.admin-option');
-		var checkBoolean = quizCtrl.addQuestionOnLocalStorage(selectedDomItems.newQuestionText, adminOptions);
+		let adminOptions = document.querySelectorAll('.admin-option');
+		let checkBoolean = quizCtrl.addQuestionOnLocalStorage(selectedDomItems.newQuestionText, adminOptions);
 		if (checkBoolean) {
 			UICtrl.createQuestionList(quizCtrl.getQuestionLocalStorage);
 		}
@@ -325,6 +369,10 @@ var controller = (function(quizCtrl, UICtrl) {
 	});
 
 	selectedDomItems.questsClearBtn.addEventListener('click', function() {
-		UICtrl.clearQuestList;
+		UICtrl.clearQuestList(quizCtrl.getQuestionLocalStorage);
 	});
+
+	UICtrl.displayQuestion(quizCtrl.getQuestionLocalStorage, quizCtrl.getQuizProgress);
+
+	UICtrl.displayProgress(quizCtrl.getQuestionLocalStorage, quizCtrl.getQuizProgress);
 })(quizController, UIController);
