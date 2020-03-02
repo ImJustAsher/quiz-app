@@ -88,11 +88,20 @@ var quizController = (function() {
 					alert('You must insert at least two options');
 					return false;
 				}
-				// 53
 			} else {
-				// 54
 				alert('Please, Insert Question');
-				// 99
+
+				return false;
+			}
+		},
+
+		checkAnswer: function(ans) {
+			if (
+				questionLocalStorage.getQuestionCollection()[quizProgress.questionIndex].correctAnswer ===
+				ans.textContent
+			) {
+				return true;
+			} else {
 				return false;
 			}
 		}
@@ -102,9 +111,7 @@ var quizController = (function() {
 /*******************************
 **********UI CONTROLLER*********
 *******************************/
-// 2
 var UIController = (function() {
-	// 5
 	var domItems = {
 		//*******Admin Panel Elements********/
 		questInsertBtn: document.getElementById('question-insert-btn'),
@@ -122,7 +129,7 @@ var UIController = (function() {
 	};
 
 	return {
-		getDomItems: domItems, // 8
+		getDomItems: domItems,
 		addInputsDynamically: function() {
 			var addInput = function() {
 				var inputHTML, z;
@@ -152,7 +159,6 @@ var UIController = (function() {
 		},
 
 		createQuestionList: function(getQuestions) {
-			// 86          // 91
 			var questHTML, numberingArr;
 			numberingArr = [];
 			domItems.insertedQuestsWrapper.innerHTML = '';
@@ -375,4 +381,14 @@ let controller = (function(quizCtrl, UICtrl) {
 	UICtrl.displayQuestion(quizCtrl.getQuestionLocalStorage, quizCtrl.getQuizProgress);
 
 	UICtrl.displayProgress(quizCtrl.getQuestionLocalStorage, quizCtrl.getQuizProgress);
+
+	selectedDomItems.quizOptionsWrapper.addEventListener('click', function(e) {
+		let updatedOptionsDiv = selectedDomItems.quizOptionsWrapper.querySelectorAll('div');
+
+		for (let i = 0; i < updatedOptionsDiv.length; i++) {
+			if (e.target.className === 'choice-' + i) {
+				let answer = document.querySelector('.quiz-options-wrapper div p.' + e.target.className);
+			}
+		}
+	});
 })(quizController, UIController);
