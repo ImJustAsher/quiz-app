@@ -125,7 +125,12 @@ var UIController = (function() {
 		askedQuestText: document.getElementById('asked-question-text'),
 		quizOptionsWrapper: document.querySelector('.quiz-options-wrapper'),
 		progressBar: document.querySelector('progress'),
-		progressPar: document.getElementById('progress')
+		progressPar: document.getElementById('progress'),
+		instAnsContainer: document.querySelector('.instant-answer-container'),
+		instAnsText: document.getElementById('instant-answer-text'),
+		instAnsDiv: document.getElementById('instant-answer-wrapper'),
+		emotionIcon: document.getElementById('emotion'),
+		nextQuestBtn: document.getElementById('next-question-btn')
 	};
 
 	return {
@@ -343,6 +348,30 @@ var UIController = (function() {
 
 			domItems.progressPar.textContent =
 				progress.questionIndex + 1 + '/' + storageQuestList.getQuestionCollection().length;
+		},
+
+		newDesign: function(ansResult, selectedAnswer) {
+			let twoOptions, index;
+
+			index = 0;
+
+			if (ansResult) {
+				index = 1;
+			}
+
+			twoOptions = {
+				instAnswerText: [ 'This is a wrong answer', 'This is a correct answer' ],
+				instAnswerClass: [ 'red', 'green' ],
+				emotionType: [ 'images/sad.png', 'images/happy.png' ],
+				optionSpanBg: [ 'rgba(200, 0, 0, .7)', 'rgba(0, 250, 0, .2)' ]
+			};
+
+			domItems.quizOptionsWrapper.style.cssText = 'opacity: 0.6; pointer-events: none;';
+			domItems.instAnsContainer.style.opacity = '1';
+			domItems.instAnsText.textContent = twoOptions.instAnswerText[index];
+			domItems.instAnsDiv.className = twoOptions.instAnswerClass[index];
+			domItems.emotionIcon.setAttribute('src', twoOptions.emotionType[index]);
+			selectedAnswer.previousElementSibling.style.backgroundColor = twoOptions.optionSpanBg[index];
 		}
 	};
 })();
@@ -388,6 +417,10 @@ let controller = (function(quizCtrl, UICtrl) {
 		for (let i = 0; i < updatedOptionsDiv.length; i++) {
 			if (e.target.className === 'choice-' + i) {
 				let answer = document.querySelector('.quiz-options-wrapper div p.' + e.target.className);
+
+				let answerResult = quizCtrl.checkAnswer(answer);
+
+				UICtrl.newDesign(answerResult, answer);
 			}
 		}
 	});
