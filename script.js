@@ -31,6 +31,37 @@ var quizController = (function() {
 		questionIndex: 0
 	};
 
+	//********PERSON CONSTRUCTOR ********//
+
+	function Person(id, firstname, lastname, score) {
+		this.id = id;
+		this.firstname = firstname;
+		this.lastname = lastname;
+		this.score = score;
+	}
+
+	let currPersonData = {
+		fullname: [ 'Nick', 'Doe' ],
+		score: 0
+	};
+
+	let personLocalStorage = {
+		setPersonData: function(newPersonData) {
+			localStorage.setItem('personData', JSON.stringify(newPersonData));
+		},
+		getPersonData: function() {
+			return JSON.parse(localStorage.getItem('personData'));
+		},
+
+		removePersonData: function() {
+			localStorage.removeItem('personData');
+		}
+	};
+
+	if (personLocalStorage.getPersonData === null) {
+		personLocalStorage.setPersonData([]);
+	}
+
 	return {
 		getQuizProgress: quizProgress,
 
@@ -104,6 +135,35 @@ var quizController = (function() {
 			} else {
 				return false;
 			}
+		},
+
+		isFinished: function() {
+			return quizProgress.questionIndex + 1 === questionLocalStorage.getQuestionCollection().length;
+		},
+
+		addPerson: function() {
+			let newPerson, personId, personData;
+
+			if (personLocalStorage.getPersonData.length > 0) {
+				personId = personLocalStorage.getPersonData()[personLocalStorage.getPersonData().length - 1];
+			} else {
+				personId = 0;
+			}
+
+			newPerson = new Person(
+				personId,
+				currPersonData.fullname[0],
+				currPersonData.fullname[1],
+				currPersonData.score
+			);
+
+			personData = personLocalStorage.getPersonData();
+
+			personData.push(newPerson);
+
+			personLocalStorage.setPersonData(personData);
+
+			console.log(newPerson);
 		}
 	};
 })();
@@ -130,7 +190,9 @@ var UIController = (function() {
 		instAnsText: document.getElementById('instant-answer-text'),
 		instAnsDiv: document.getElementById('instant-answer-wrapper'),
 		emotionIcon: document.getElementById('emotion'),
-		nextQuestBtn: document.getElementById('next-question-btn')
+		nextQuestBtn: document.getElementById('next-question-btn'),
+		//****** Landing Page Elements *******/
+		startQuizBtn: document.getElementById('start-quiz-btn')
 	};
 
 	return {
@@ -372,6 +434,10 @@ var UIController = (function() {
 			domItems.instAnsDiv.className = twoOptions.instAnswerClass[index];
 			domItems.emotionIcon.setAttribute('src', twoOptions.emotionType[index]);
 			selectedAnswer.previousElementSibling.style.backgroundColor = twoOptions.optionSpanBg[index];
+		},
+		resetDesign: function() {
+			domItems.quizOptionsWrapper.style.cssText = '';
+			domItems.instAnsContainer.style.opacity = '0';
 		}
 	};
 })();
@@ -421,6 +487,25 @@ let controller = (function(quizCtrl, UICtrl) {
 				let answerResult = quizCtrl.checkAnswer(answer);
 
 				UICtrl.newDesign(answerResult, answer);
+
+				if (quizCtrl.isFinished()) {
+					selectedDomItems.nextQuestBtn.textContent = 'Finish';
+				}
+
+				let nextQuestion = function(questData, progress) {
+					if (quizCtrl.isFinished()) {
+						quizCtrl.addPerson();
+						console.log('Finished');
+						//finish quiz
+					} else {
+						UICtrl.resetDesign();
+						quizCtrl.getQuizProgress.questionIndex++;
+						UICtrl.displayQuestion(quizCtrl.getQuestionLocalStorage, quizCtrl.getQuizProgress);
+					}
+				};
+				selectedDomItems.nextQuestBtn.onclick = function() {
+					nextQuestion(quizCtrl.getQuestionLocalStorage, quizCtrl.getQuizProgress);
+				};
 			}
 		}
 	});
