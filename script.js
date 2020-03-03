@@ -45,6 +45,8 @@ var quizController = (function() {
 		score: 0
 	};
 
+	let adminFullName = [ 'John', 'Smith' ];
+
 	let personLocalStorage = {
 		setPersonData: function(newPersonData) {
 			localStorage.setItem('personData', JSON.stringify(newPersonData));
@@ -164,7 +166,11 @@ var quizController = (function() {
 			personLocalStorage.setPersonData(personData);
 
 			console.log(newPerson);
-		}
+		},
+
+		getCurrPersonData: currPersonData,
+
+		getAdminFullName: adminFullName
 	};
 })();
 
@@ -173,7 +179,8 @@ var quizController = (function() {
 *******************************/
 var UIController = (function() {
 	var domItems = {
-		//*******Admin Panel Elements********/
+		//*******Admin Panel Elements********//
+		adminPanelSection: document.querySelector('.admin-panel-container'),
 		questInsertBtn: document.getElementById('question-insert-btn'),
 		newQuestionText: document.getElementById('new-question-text'),
 		adminOptions: document.querySelectorAll('.admin-option'),
@@ -182,6 +189,8 @@ var UIController = (function() {
 		questUpdateBtn: document.getElementById('question-update-btn'),
 		questDeleteBtn: document.getElementById('question-delete-btn'),
 		questsClearBtn: document.getElementById('questions-clear-btn'),
+		//*********Quiz Section Elements *********//
+		quizSection: document.querySelector('.quiz-container'),
 		askedQuestText: document.getElementById('asked-question-text'),
 		quizOptionsWrapper: document.querySelector('.quiz-options-wrapper'),
 		progressBar: document.querySelector('progress'),
@@ -192,7 +201,10 @@ var UIController = (function() {
 		emotionIcon: document.getElementById('emotion'),
 		nextQuestBtn: document.getElementById('next-question-btn'),
 		//****** Landing Page Elements *******/
-		startQuizBtn: document.getElementById('start-quiz-btn')
+		landPageSection: document.querySelector('.landing-page-container'),
+		startQuizBtn: document.getElementById('start-quiz-btn'),
+		firstNameInput: document.getElementById('firstname'),
+		lastNameInput: document.getElementById('lastname')
 	};
 
 	return {
@@ -438,6 +450,32 @@ var UIController = (function() {
 		resetDesign: function() {
 			domItems.quizOptionsWrapper.style.cssText = '';
 			domItems.instAnsContainer.style.opacity = '0';
+		},
+
+		getFullName: function(currPerson, storageQuestList, admin) {
+			if (domItems.firstNameInput.value !== '' && domItems.lastNameInput.value !== '') {
+				if (!(domItems.firstNameInput.value === admin[0] && domItems.lastNameInput.value === admin[1])) {
+					if (storageQuestList.getQuestionCollection().length > 0) {
+						currPerson.fullname.push(domItems.firstNameInput.value);
+
+						currPerson.lastname.push(domItems.lastNameInput.value);
+
+						domItems.landPageSection.style.display = 'none';
+
+						domItems.quizSection.style.display = 'block';
+
+						console.log(currPerson);
+					} else {
+						alert('Quiz is not ready, please contact administrator');
+					}
+				} else {
+					domItems.landPageSection.style.display = 'none';
+
+					domItems.quizSection.style.display = 'block';
+				}
+			} else {
+				alert('Please enter your first name and last name');
+			}
 		}
 	};
 })();
@@ -508,5 +546,9 @@ let controller = (function(quizCtrl, UICtrl) {
 				};
 			}
 		}
+	});
+
+	selectedDomItems.startQuizBtn.addEventListener('click', function() {
+		UICtrl.getFullName(quizCtrl.getCurrPersonData, quizCtrl.getQuestionLocalStorage, quizCtrl.getAdminFullName);
 	});
 })(quizController, UIController);
